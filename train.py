@@ -1,10 +1,11 @@
-from __future__ import  absolute_import
+from __future__ import absolute_import
 # though cupy is not used but without this line, it raise errors...
 import cupy as cp
 import os
 import matplotlib
-from tqdm import tqdm
+import torch
 
+from utils import model_utils
 from utils.config import opt
 from data.dataset import Dataset, TestDataset, inverse_normalize
 from model import FasterRCNNVGG16
@@ -26,7 +27,7 @@ matplotlib.use('agg')
 def eval(dataloader, faster_rcnn, test_num=10000):
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
-    for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
+    for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in enumerate(dataloader):
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(imgs, [sizes])
         gt_bboxes += list(gt_bboxes_.numpy())
@@ -71,13 +72,16 @@ def train(**kwargs):
     lr_ = opt.lr
     for epoch in range(opt.epoch):
         trainer.reset_meters()
-        for ii, (img, bbox_, label_, scale) in tqdm(enumerate(dataloader)):
+        for ii, (img, bbox_, label_, scale) in enumerate(dataloader):
+            print('epoch %d step %d' % (epoch, ii))
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
             trainer.train_step(img, bbox, label, scale)
+        print('this epoch has finished, eval now...')
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
 
         lr_ = trainer.faster_rcnn.optimizer.param_groups[0]['lr']
+        print('the eval result is:')
         log_info = 'lr:{}, map:{},loss:{}'.format(str(lr_),
                                                   str(eval_result['map']),
                                                   str(trainer.get_meter_data()))
@@ -91,10 +95,12 @@ def train(**kwargs):
             trainer.faster_rcnn.scale_lr(opt.lr_decay)
             lr_ = lr_ * opt.lr_decay
 
-        if epoch == 13: 
+        if epoch == 13:
             break
 
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = '0,1,2'
+    used_gpus = '0,1,2'
+    num_gpus = len(used_gpus.split(','))
+    os.environ["CUDA_VISIBLE_DEVICES"] = used_gpus
     train()
