@@ -10,7 +10,6 @@ from model import FasterRCNNVGG16
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
-from utils.vis_tool import visdom_bbox
 from utils.eval_tool import eval_detection_voc
 
 matplotlib.use('agg')
@@ -60,7 +59,6 @@ def train(**kwargs):
         trainer.load(opt.load_path)
         print('load pretrained model from %s' % opt.load_path)
 
-    trainer.vis.text(dataset.db.label_names, win='labels')
     best_map = 0
     for epoch in range(7):
         trainer.reset_meters()
@@ -69,32 +67,6 @@ def train(**kwargs):
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
             losses = trainer.train_step(img, bbox, label, scale)
 
-            if (ii + 1) % opt.plot_every == 0:
-                if os.path.exists(opt.debug_file):
-                    ipdb.set_trace()
-
-                # plot loss
-                trainer.vis.plot_many(trainer.get_meter_data())
-
-                # plot groud truth bboxes
-                ori_img_ = (img * 0.225 + 0.45).clamp(min=0, max=1) * 255
-                gt_img = visdom_bbox(at.tonumpy(ori_img_)[0], 
-                                    at.tonumpy(bbox_)[0], 
-                                    label_[0].numpy())
-                trainer.vis.img('gt_img', gt_img)
-
-                # plot predicti bboxes
-                _bboxes, _labels, _scores = trainer.faster_rcnn.predict(ori_img,visualize=True)
-                pred_img = visdom_bbox( at.tonumpy(ori_img[0]), 
-                                        at.tonumpy(_bboxes[0]),
-                                        at.tonumpy(_labels[0]).reshape(-1), 
-                                        at.tonumpy(_scores[0]))
-                trainer.vis.img('pred_img', pred_img)
-
-                # rpn confusion matrix(meter)
-                trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
-                # roi confusion matrix
-                trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
         if epoch==4:
             trainer.faster_rcnn.scale_lr(opt.lr_decay)
 
