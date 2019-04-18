@@ -70,10 +70,11 @@ def train(**kwargs):
         print('load pretrained model from %s' % opt.load_path)
     best_map = 0
     lr_ = opt.lr
+    total_size =len(dataloader)
     for epoch in range(opt.epoch):
         trainer.reset_meters()
         for ii, (img, bbox_, label_, scale) in enumerate(dataloader):
-            print('epoch %d step %d' % (epoch, ii))
+            print('epoch %d step %d/%d' % (epoch, ii, total_size))
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
             trainer.train_step(img, bbox, label, scale)
