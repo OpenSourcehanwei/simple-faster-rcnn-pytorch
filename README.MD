@@ -135,7 +135,7 @@ If you want to use pretrained model from torchvision, you may skip this step.
 ### 5.3 begin training
 
 ```Bash
-mkdir checkpoints/ # folder for snapshots
+mkdir dataset/model/ # folder for snapshots
 ```
 
 ```bash

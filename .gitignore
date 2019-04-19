@@ -63,5 +63,4 @@ target/
 MANIFEST
 .idea/
 .idea/
-checkpoints/
 dataset/

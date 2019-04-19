@@ -12,6 +12,7 @@ from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
 from utils.eval_tool import eval_detection_voc
+from utils.vis_tool import visdom_bbox
 
 # fix for ulimit
 # https://github.com/pytorch/pytorch/issues/973#issuecomment-346405667
@@ -80,6 +81,22 @@ def train(**kwargs):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
             trainer.train_step(img, bbox, label, scale)
+
+            if (ii + 1) % opt.plot_every == 0:
+                # plot groud truth bboxes
+                ori_img_ = inverse_normalize(at.tonumpy(img[0]))
+                gt_img = visdom_bbox(ori_img_,
+                                     at.tonumpy(bbox_[0]),
+                                     at.tonumpy(label_[0]))
+                # plot predicti bboxes
+                _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
+                pred_img = visdom_bbox(ori_img_,
+                                       at.tonumpy(_bboxes[0]),
+                                       at.tonumpy(_labels[0]).reshape(-1),
+                                       at.tonumpy(_scores[0]))
+
+                gt_img.savefig('dataset/result/gt_img_%d_%d.png'%(epoch, ii))
+                pred_img.savefig('dataset/result/pred_img_%d_%d.png'%(epoch, ii))
 
         print('this epoch has finished, eval now...')
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)

@@ -17,6 +17,6 @@ del sd['classifier.4.bias']
 
 import  os
 # speicify the path to save
-if not os.path.exists('checkpoints'):
-    os.makedirs('checkpoints')
-torch.save(sd, "checkpoints/vgg16_caffe.pth")
+if not os.path.exists('dataset/model/'):
+    os.makedirs('dataset/model/')
+torch.save(sd, "dataset/model/vgg16_caffe.pth")
