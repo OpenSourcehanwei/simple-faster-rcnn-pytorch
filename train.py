@@ -4,12 +4,13 @@ import cupy as cp
 import os
 import matplotlib
 import torch
+from tensorflow.contrib.timeseries.python.timeseries import model_utils
 
 from utils.config import opt
 from data.dataset import Dataset, TestDataset, inverse_normalize
 from model import FasterRCNNVGG16
 from torch.utils import data as data_
-from trainer import FasterRCNNTrainer
+from trainer import FasterRCNNTrainer, MyDataParallel
 from utils import array_tool as at
 from utils.eval_tool import eval_detection_voc
 from utils.vis_tool import visdom_bbox
@@ -65,6 +66,9 @@ def train(**kwargs):
                                        pin_memory=True
                                        )
     faster_rcnn = FasterRCNNVGG16()
+    device, device_ids = model_utils.get_gpu_devices(num_gpus)
+    faster_rcnn = MyDataParallel(faster_rcnn, device_ids=device_ids).to(device)
+
     print('model construct completed')
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
     if opt.load_path:

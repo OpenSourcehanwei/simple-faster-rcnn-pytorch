@@ -21,6 +21,10 @@ LossTuple = namedtuple('LossTuple',
                         ])
 
 
+class MyDataParallel(nn.DataParallel):
+    def __getattr__(self, name):
+        return getattr(self.module, name)
+
 class FasterRCNNTrainer(nn.Module):
     """wrapper for conveniently training. return losses
 
