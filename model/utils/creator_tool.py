@@ -95,7 +95,7 @@ class ProposalTargetCreator(object):
 
         pos_roi_per_image = np.round(self.n_sample * self.pos_ratio)
         iou = bbox_iou(roi, bbox)
-        gt_assignment = iou.argmax(axis=1)
+        gt_assignment = iou.argmax(axis=1)  # 仍然考虑max，负样本做损失时对应的gt并非随机选，而是选取离它最近的的gt
         max_iou = iou.max(axis=1)
         # Offset range of classes from [0, n_fg_class - 1] to [1, n_fg_class].
         # The label with value 0 is the background.

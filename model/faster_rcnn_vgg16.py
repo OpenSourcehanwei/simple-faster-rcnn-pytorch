@@ -135,7 +135,7 @@ class VGG16RoIHead(nn.Module):
         roi_indices = at.totensor(roi_indices).float()
         rois = at.totensor(rois).float()
         indices_and_rois = t.cat([roi_indices[:, None], rois], dim=1)
-        # NOTE: important: yx->xy
+        # NOTE: important: yx->xy  # why?，和cupy实现的数组的高效操作有关吗
         xy_indices_and_rois = indices_and_rois[:, [0, 2, 1, 4, 3]]
         indices_and_rois =  xy_indices_and_rois.contiguous()
 
