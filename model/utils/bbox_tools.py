@@ -51,7 +51,7 @@ def loc2bbox(src_bbox, loc):
     if src_bbox.shape[0] == 0:
         return xp.zeros((0, 4), dtype=loc.dtype)
 
-    src_bbox = src_bbox.astype(src_bbox.dtype, copy=False)
+    src_bbox = src_bbox.astype(src_bbox.dtype, copy=False)  # 没做任何事呀？
 
     src_height = src_bbox[:, 2] - src_bbox[:, 0]
     src_width = src_bbox[:, 3] - src_bbox[:, 1]
@@ -65,7 +65,7 @@ def loc2bbox(src_bbox, loc):
 
     ctr_y = dy * src_height[:, xp.newaxis] + src_ctr_y[:, xp.newaxis]
     ctr_x = dx * src_width[:, xp.newaxis] + src_ctr_x[:, xp.newaxis]
-    h = xp.exp(dh) * src_height[:, xp.newaxis]
+    h = xp.exp(dh) * src_height[:, xp.newaxis]  # 取乘方，保证为正
     w = xp.exp(dw) * src_width[:, xp.newaxis]
 
     dst_bbox = xp.zeros(loc.shape, dtype=loc.dtype)

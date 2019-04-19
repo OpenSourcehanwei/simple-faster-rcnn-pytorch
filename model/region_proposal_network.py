@@ -103,7 +103,7 @@ class RegionProposalNetwork(nn.Module):
             np.array(self.anchor_base),
             self.feat_stride, hh, ww)
 
-        n_anchor = anchor.shape[0] // (hh * ww)
+        n_anchor = anchor.shape[0] // (hh * ww)  # 为何不用 self.anchor_base.shape[0]
         h = F.relu(self.conv1(x))
 
         rpn_locs = self.loc(h)
