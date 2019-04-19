@@ -4,14 +4,13 @@ import cupy as cp
 import os
 import matplotlib
 import torch
-from tensorflow.contrib.timeseries.python.timeseries import model_utils
 
 from utils.config import opt
 from data.dataset import Dataset, TestDataset, inverse_normalize
 from model import FasterRCNNVGG16
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer, MyDataParallel
-from utils import array_tool as at
+from utils import array_tool as at, model_utils
 from utils.eval_tool import eval_detection_voc
 from utils.vis_tool import visdom_bbox
 
